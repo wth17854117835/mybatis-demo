@@ -3,15 +3,57 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ritian.mybatis.dao.UserMapper">
+    <!--mybatis 的二级缓存的作用域是一个mapper的namespace ，同一个namespace中查询sql可以从缓存中命中。-->
+    <!--开启二级缓存-->
+    <!--开启二级缓存，必须序列化：User -->
+    <cache/>
+    <!--
+        id：resultMap的唯一标识
+        type：返回的结果集对应的java的实体类型，使用别名
+        autoMapping：默认完成映射，如果开启驼峰匹配，可以解决驼峰匹配
+    -->
+    <resultMap id="userResultMap" type="User" autoMapping="true">
+        <!--指定主键 column:数据库中的列名  property：java实体类中的属性名-->
+        <id column="id" property="id" />
+        <!--数据库列名和java实体类中的属性名对应-->
+        <result column="user_name" property="userName" />
+        <result column="password" property="password" />
+        <result column="name" property="name" />
+        <result column="age" property="age" />
+        <result column="sex" property="sex" />
+        <result column="birthday" property="birthday" />
+        <result column="created" property="created" />
+        <result column="updated" property="updated" />
+    </resultMap>
+
+    <sql id="commonSql">
+		id,
+        user_name,
+        password,
+        name,
+        age,
+        sex,
+        birthday,
+        created,
+        updated
+    </sql>
+
     <!--
        1.#{},预编译的方式preparedstatement，使用占位符替换，防止sql注入，一个参数的时候，任意参数名可以接收
        2.${},普通的Statement，字符串直接拼接，不可以防止sql注入，一个参数的时候，必须使用${value}接收参数
+       select * from #{tableName} ===> select * from ? , tb_user(String) ===> select * from “tb_user”;
      -->
     <select id="queryUserByTableName" resultType="com.ritian.mybatis.pojo.User">
         select * from ${tableName}
     </select>
 
-    <select id="login" resultType="User">
+    <select id="login01" resultType="User">
+        select * from tb_user where user_name = #{0} and password = #{1}
+    </select>
+    <select id="login02" resultType="User">
+        select * from tb_user where user_name = #{param1} and password = #{param2}
+    </select>
+    <select id="login03" resultType="User">
         select * from tb_user where user_name = #{userName} and password = #{password}
     </select>
 
@@ -20,8 +62,11 @@
        resultType：sql语句查询结果集的封装类型，使用动态代理之后和方法的返回类型一致；resultMap：二选一
        parameterType：参数的类型，使用动态代理之后和方法的参数类型一致
      -->
-    <select id="queryUserById" resultType="com.ritian.mybatis.pojo.User">
-        select * from tb_user where id = #{id}
+    <!--<select id="queryUserById" resultType="com.ritian.mybatis.pojo.User">-->
+        <!--select * from tb_user where id = #{id}-->
+    <!--</select>-->
+    <select id="queryUserById" resultMap="userResultMap">
+        select <include refid="commonSql"></include> from tb_user where id = #{id}
     </select>
     <select id="queryUserAll" resultType="com.ritian.mybatis.pojo.User">
         select * from tb_user
@@ -86,4 +131,50 @@
     <delete id="deleteUserById" parameterType="java.lang.Long">
         delete from tb_user where id=#{id}
     </delete>
+
+    <select id="queryUserList" resultType="User">
+        select <include refid="commonSql" /> from tb_user WHERE sex=1
+        <if test="name!=null and name.trim()!=''">
+            and name like '%${name}%'
+        </if>
+    </select>
+
+    <select id="queryUserListByNameOrAge" resultType="User">
+        select <include refid="commonSql" /> from tb_user WHERE sex=1
+        <!--
+        1.一旦有条件成立的when，后续的when则不会执行
+        2.当所有的when都不执行时,才会执行otherwise
+        -->
+        <choose>
+            <when test="name!=null and name.trim()!=''">
+                and name like '%${name}%'
+            </when>
+            <when test="age!=null">
+                and age = #{age}
+            </when>
+            <otherwise>
+                and name='王天昊'
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="queryUserListByNameAndAge" resultType="User">
+        select <include refid="commonSql" /> from tb_user
+        <!--如果多出一个and，会自动去除，如果缺少and或者多出多个and则会报错-->
+        <where>
+            <if test="name!=null and name.trim()!=''">
+                and name like '%${name}%'
+            </if>
+            <if test="age!=null">
+                and age = #{age}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryUserListByIds" resultType="User">
+        select <include refid="commonSql" /> from tb_user where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

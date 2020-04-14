@@ -17,11 +17,15 @@
         <!--映射器中配置的缓存，默认true-->
         <setting name="cacheEnabled" value="true"/>
         <!--延迟加载，默认false-->
-        <setting name="lazyLoadingEnabled" value="false"/>
+        <setting name="lazyLoadingEnabled" value="true"/>
         <!--当启用时，延迟加载属性的对象的加载与否完全取决于对任意延迟属性的调用；反之，每种属性会按需加载。 默认true-->
-        <setting name="aggressiveLazyLoading" value="true"/>
+        <!--延迟加载的意义在于，虽然是关联查询，但不是及时将关联的数据查询出来，而是在需要的时候进行查询-->
+        <!--默认为true，当第一次使用get获取对象属性时，完成加载所有属性；false时，当get某属性时完成加载-->
+        <setting name="aggressiveLazyLoading" value="false"/>
         <!--驼峰匹配，默认false-->
         <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!--开启二级缓存,全局总开关，这里关闭，mapper中开启了也没用-->
+        <setting name="cacheEnabled" value="false"/>
     </settings>
 
 
@@ -65,9 +69,16 @@
         </environment>
     </environments>
 
-    <mappers>
-        <mapper resource="mapper/tb_user.xml"></mapper>
-        <mapper resource="mapper/UserDaoMapper.xml"></mapper>
-        <mapper resource="mapper/UserMapper.xml"></mapper>
-    </mappers>
+    <!--需要告诉 MyBatis 到哪里去找到 SQL 映射语句。即告诉 MyBatis 到哪里去找映射文件-->
+    <!--<mappers>-->
+        <!--&lt;!&ndash; 使用相对于类路径的资源引用 &ndash;&gt;-->
+        <!--<mapper resource="mapper/tb_user.xml"></mapper>-->
+        <!--<mapper resource="mapper/UserDaoMapper.xml"></mapper>-->
+        <!--<mapper resource="mapper/UserMapper.xml"></mapper>-->
+        <!--<mapper resource="mapper/OrderMapper.xml"></mapper>-->
+
+        <!--&lt;!&ndash; 使用映射器接口实现类的完全限定类名 &ndash;&gt;-->
+        <!--&lt;!&ndash;<mapper class="com.ritian.mybatis.dao.UserDao"></mapper>&ndash;&gt;-->
+        <!--&lt;!&ndash;<mapper class="com.ritian.mybatis.dao.UserMapper"></mapper>&ndash;&gt;-->
+    <!--</mappers>-->
 </configuration>

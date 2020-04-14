@@ -2,26 +2,21 @@ package com.ritian.mybatis.pojo;
 
 import lombok.Data;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author: wangth_oup
- * @date: 2020-04-13 16:14
- * @description:
+ * @date: 2020-04-14 13:45
+ * @description: 一对一查询 方法一：核心思想扩展Order对象，来完成映射
  **/
 @Data
-public class User implements Serializable {
-
-    private static final long serialVersionUID = 1006334881114334715L;
-
-    private String id;
+public class OrderUser extends Order {
     private String userName;
     private String password;
     private String name;
     private Integer age;
     private Integer sex;
     private Date birthday;
-    private String created;
-    private String updated;
+    private Date created;
+    private Date updated;
 }
